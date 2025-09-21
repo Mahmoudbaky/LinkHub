@@ -15,6 +15,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth"; // Adjust path to your auth config
 import Link from "next/link";
 import { ClientThemeToggle } from "@/components/client-theme-toggle";
+import { UILink } from "@/types";
 
 export default async function ProfilePage(props: {
   params: Promise<{ username: string }>;
@@ -70,10 +71,8 @@ export default async function ProfilePage(props: {
     },
   ].filter((link) => link.url);
 
-  console.log("USER", user.links);
-
   const activeLinks = user.links
-    .filter((link) => link.isActive)
+    .filter((link: UILink) => link.isActive)
     .sort((a, b) => a.position - b.position);
 
   return (
