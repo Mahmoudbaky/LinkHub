@@ -93,6 +93,14 @@ export function SignInForm({
           </div>
         </div>
       </form>
+      <div className="mt-4">
+        <p className="text-sm text-center text-primary">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-blue-600 hover:underline">
+            Sign Up
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

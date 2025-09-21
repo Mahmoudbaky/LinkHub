@@ -358,7 +358,7 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium">
                 Total Clicks
               </CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted dark:text-muted-foreground" />
+              <BarChart3 className="h-4 w-4 text-primary/85 dark:text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -375,7 +375,7 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium">
                 Active Links
               </CardTitle>
-              <ExternalLink className="h-4 w-4 text-muted dark:text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-primary/85 dark:text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{activeLinks}</div>
@@ -388,7 +388,7 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Profile URL</CardTitle>
-              <Link2 className="h-4 w-4 text-muted dark:text-muted-foreground" />
+              <Link2 className="h-4 w-4 text-primary/85 dark:text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -531,7 +531,7 @@ export default function DashboardPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm text-muted dark:text-muted-foreground">
+                      <div className="flex items-center gap-2 text-sm text-primary/85 dark:text-muted-foreground">
                         <BarChart3 className="w-4 h-4" />
                         {link.clicks}
                       </div>

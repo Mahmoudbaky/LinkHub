@@ -58,7 +58,13 @@ const SignUpForm = () => {
   return (
     <div className="w-full max-w-md mx-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-2xl font-bold">Sign Up</h1>
+            <p className="text-muted-foreground text-sm text-balance">
+              Enter your email below to create a new account
+            </p>
+          </div>
           <FormField
             control={form.control}
             name="name"
@@ -134,6 +140,14 @@ const SignUpForm = () => {
           </Button>
         </form>
       </Form>
+      <div className="mt-4">
+        <p className="text-sm text-center text-primary">
+          Already have an account?{" "}
+          <a href="/signin" className="text-blue-600 hover:underline">
+            Sign In
+          </a>
+        </p>
+      </div>
     </div>
   );
 };
