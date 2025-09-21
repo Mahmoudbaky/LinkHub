@@ -51,3 +51,16 @@ export type Session = {
   expires: Date;
   user: User;
 };
+
+export interface UILink {
+  id: string;
+  title: string;
+  url: string;
+  description: string | null;
+  icon: string | null;
+  position: number;
+  isActive: boolean;
+  clicks: number;
+  backgroundColor: string | null;
+  textColor: string | null;
+}

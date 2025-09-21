@@ -115,3 +115,27 @@ export const toggleLinkActivation = async (id: string, isActive: boolean) => {
     return { success: false, error: "Failed to update link" };
   }
 };
+
+export const editLinkTheme = async (
+  id: string,
+  data: {
+    backgroundColor: string | null;
+    textColor: string | null;
+    icon: string | null;
+  }
+) => {
+  try {
+    const link = await prisma.link.update({
+      where: { id },
+      data,
+    });
+    return {
+      success: true,
+      message: "Link theme updated successfully",
+      data: link,
+    };
+  } catch (error) {
+    console.error("Error updating link theme:", error);
+    return { success: false, error: "Failed to update link theme" };
+  }
+};

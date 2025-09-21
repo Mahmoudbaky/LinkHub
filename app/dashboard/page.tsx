@@ -48,25 +48,17 @@ import {
 } from "@/lib/actions/link.actions";
 import { User } from "@/types";
 import Link from "next/link";
-
-// Simplified interface for UI state
-interface UILink {
-  id: string;
-  title: string;
-  url: string;
-  description: string | null;
-  icon: string | null;
-  position: number;
-  isActive: boolean;
-  clicks: number;
-}
-
+import { UILink } from "@/types";
+import EditLinkForm from "@/components/dashboard/EditLinkForm";
+import EditLinkThemeForm from "@/components/dashboard/EditLinkThemeForm";
+import { ThemeToggle } from "@/components/theme-toggle";
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [links, setLinks] = useState<UILink[]>([]);
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [editingLink, setEditingLink] = useState<UILink | null>(null);
+  const [editingLinkTheme, setEditingLinkTheme] = useState<UILink | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -112,6 +104,8 @@ export default function DashboardPage() {
                 position: link.position,
                 isActive: link.isActive,
                 clicks: link.clicks,
+                backgroundColor: link.backgroundColor,
+                textColor: link.textColor,
               })) || [];
             setLinks(uiLinks);
           }
@@ -195,6 +189,8 @@ export default function DashboardPage() {
           position: result.data.position,
           isActive: result.data.isActive,
           clicks: result.data.clicks,
+          backgroundColor: result.data.backgroundColor,
+          textColor: result.data.textColor,
         };
 
         setLinks([...links, newUILink]);
@@ -229,6 +225,8 @@ export default function DashboardPage() {
           position: result.data.position,
           isActive: result.data.isActive,
           clicks: result.data.clicks,
+          backgroundColor: result.data.backgroundColor,
+          textColor: result.data.textColor,
         };
 
         const updatedLinks = links.map((l) =>
@@ -348,6 +346,7 @@ export default function DashboardPage() {
                 Settings
               </Button>
             </Link>
+            <ThemeToggle />
           </div>
         </div>
 
@@ -570,16 +569,16 @@ export default function DashboardPage() {
 
                         {/* Edit Link Theme Dialog */}
                         <Dialog
-                          open={editingLink?.id === link.id}
+                          open={editingLinkTheme?.id === link.id}
                           onOpenChange={(open) => {
-                            if (!open) setEditingLink(null);
+                            if (!open) setEditingLinkTheme(null);
                           }}
                         >
                           <DialogTrigger asChild>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setEditingLink(link)}
+                              onClick={() => setEditingLinkTheme(link)}
                             >
                               <Palette className="w-4 h-4" />
                             </Button>
@@ -588,10 +587,10 @@ export default function DashboardPage() {
                             <DialogHeader>
                               <DialogTitle>Edit Link Theme</DialogTitle>
                             </DialogHeader>
-                            <EditLinkForm
+                            <EditLinkThemeForm
                               link={link}
                               onSave={handleEditLink}
-                              onCancel={() => setEditingLink(null)}
+                              onCancel={() => setEditingLinkTheme(null)}
                             />
                           </DialogContent>
                         </Dialog>
@@ -613,87 +612,5 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
-  );
-}
-
-// Edit Link Form Component
-function EditLinkForm({
-  link,
-  onSave,
-  onCancel,
-}: {
-  link: UILink;
-  onSave: (link: UILink) => Promise<void>;
-  onCancel: () => void;
-}) {
-  const [editedLink, setEditedLink] = useState(link);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    if (!editedLink.title || !editedLink.url) {
-      toast("Title and URL are required");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await onSave(editedLink);
-    } catch (error) {
-      console.error("Error saving link:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <>
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="edit-title">Title</Label>
-          <Input
-            id="edit-title"
-            value={editedLink.title}
-            onChange={(e) =>
-              setEditedLink({ ...editedLink, title: e.target.value })
-            }
-            disabled={isSaving}
-          />
-        </div>
-        <div>
-          <Label htmlFor="edit-url">URL</Label>
-          <Input
-            id="edit-url"
-            value={editedLink.url}
-            onChange={(e) =>
-              setEditedLink({ ...editedLink, url: e.target.value })
-            }
-            disabled={isSaving}
-          />
-        </div>
-        <div>
-          <Label htmlFor="edit-description">Description</Label>
-          <Textarea
-            id="edit-description"
-            value={editedLink.description || ""}
-            onChange={(e) =>
-              setEditedLink({
-                ...editedLink,
-                description: e.target.value || null,
-              })
-            }
-            rows={3}
-            disabled={isSaving}
-          />
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={onCancel} disabled={isSaving}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
-      </DialogFooter>
-    </>
   );
 }

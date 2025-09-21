@@ -61,3 +61,10 @@ export const updateUserSocialLinksSchema = z.object({
       "Must be a valid YouTube URL"
     ),
 });
+
+// Zod schema for link theme validation
+export const linkThemeSchema = z.object({
+  backgroundColor: z.string().nullable().optional(),
+  textColor: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+});

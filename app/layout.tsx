@@ -3,6 +3,7 @@ import { Rubik } from "next/font/google";
 import NextAuthProvider from "@/components/providers/session-provider";
 import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from "@/lib/constants";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const rubik = Rubik({ subsets: ["arabic"] });
 
@@ -21,10 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${rubik.className} antialiased`}>
         <NextAuthProvider>
-          {children}
+          <ThemeProvider
+            attribute="class" // what is the deffrance between class and data-*
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
           <Toaster
             position="top-right"
             richColors

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
   Instagram,
@@ -7,15 +8,23 @@ import {
   Linkedin,
   Youtube,
   Facebook,
+  Settings,
 } from "lucide-react";
 import { getUserByUserName } from "@/lib/actions/user.actions";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth"; // Adjust path to your auth config
+import Link from "next/link";
+import { ClientThemeToggle } from "@/components/client-theme-toggle";
 
 export default async function ProfilePage(props: {
   params: Promise<{ username: string }>;
 }) {
   const { username } = await props.params;
-
+  const session = await getServerSession(authOptions);
   const user = await getUserByUserName(username); // In real app: await getUserByUsername(params.username)
+
+  // Check if the current session user is viewing their own profile
+  const isOwnProfile = session?.user?.username === username;
 
   if (!user) {
     return (
@@ -61,6 +70,8 @@ export default async function ProfilePage(props: {
     },
   ].filter((link) => link.url);
 
+  console.log("USER", user.links);
+
   const activeLinks = user.links
     .filter((link) => link.isActive)
     .sort((a, b) => a.position - b.position);
@@ -68,6 +79,24 @@ export default async function ProfilePage(props: {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-4 py-8">
+        {/* Show dashboard button if user is logged in and viewing their own profile */}
+        {isOwnProfile && (
+          <div className="flex mb-4 w-full justify-start gap-2">
+            <Link href="/dashboard">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full cursor-pointer"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            </Link>
+
+            <ClientThemeToggle />
+          </div>
+        )}
+
         {/* Profile Header */}
         <div className="text-center mb-8">
           <Avatar className="w-24 h-24 ring-2 mb-4 mx-auto ring-gray-200 ring-offset-2">
@@ -106,18 +135,20 @@ export default async function ProfilePage(props: {
         {/* Social Links */}
         {socialLinks.length > 0 && (
           <div className="flex justify-center gap-4 mb-8">
-            {socialLinks.map(({ platform, url, icon: Icon, label }) => (
-              <a
-                key={platform}
-                href={url || ""}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full bg-card hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
-                aria-label={label}
-              >
-                <Icon className="w-5 h-5" />
-              </a>
-            ))}
+            {socialLinks.map(({ platform, url, icon: Icon, label }) => {
+              return (
+                <a
+                  key={platform}
+                  href={url || ""}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-full bg-card hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                  aria-label={label}
+                >
+                  <Icon className="w-5 h-5" />
+                </a>
+              );
+            })}
           </div>
         )}
 
@@ -129,20 +160,30 @@ export default async function ProfilePage(props: {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-4 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 group"
+                style={{
+                  backgroundColor: link.backgroundColor || undefined,
+                }}
+                className={`block p-4 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 group`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-card-foreground group-hover:text-accent-foreground mb-1 text-balance">
+                <div className="flex items-center">
+                  <div className="flex-1 flex items-center justify-center gap-3 min-w-0">
+                    {/* The logo */}
+                    {link.icon ? (
+                      <img src={link.icon} alt="logo" className="w-7 h-7" />
+                    ) : (
+                      <></>
+                    )}
+
+                    {/* The Text */}
+                    <h3
+                      style={{
+                        color: link.textColor || undefined,
+                      }}
+                      className={`font-semibold text-card-foreground group-hover:text-accent-foreground mb-1 text-balance`}
+                    >
                       {link.title}
                     </h3>
-                    {link.description && (
-                      <p className="text-sm text-card-foreground group-hover:text-accent-foreground/80 text-pretty">
-                        {link.description}
-                      </p>
-                    )}
                   </div>
-                  <ExternalLink className="w-5 h-5 text-muted group-hover:text-accent-foreground/80 ml-3 flex-shrink-0" />
                 </div>
               </a>
             </Card>
