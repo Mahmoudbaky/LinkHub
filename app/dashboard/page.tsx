@@ -25,6 +25,7 @@ import {
   BarChart3,
   Settings,
   Copy,
+  Link2,
   Check,
   Palette,
 } from "lucide-react";
@@ -329,7 +330,7 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-4">
             <Link
               href={`/${user.username}`}
               target="_blank"
@@ -357,13 +358,15 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium">
                 Total Clicks
               </CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted" />
+              <BarChart3 className="h-4 w-4 text-muted dark:text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {totalClicks.toLocaleString()}
               </div>
-              <p className="text-xs text-neutral-600">All time</p>
+              <p className="text-xs text-neutral-600 dark:text-muted-foreground">
+                All time
+              </p>
             </CardContent>
           </Card>
 
@@ -372,11 +375,11 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium">
                 Active Links
               </CardTitle>
-              <ExternalLink className="h-4 w-4 text-muted" />
+              <ExternalLink className="h-4 w-4 text-muted dark:text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{activeLinks}</div>
-              <p className="text-xs text-neutral-600">
+              <p className="text-xs text-neutral-600 dark:text-muted-foreground">
                 of {links.length} total
               </p>
             </CardContent>
@@ -385,7 +388,7 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Profile URL</CardTitle>
-              <Copy className="h-4 w-4 text-muted" />
+              <Link2 className="h-4 w-4 text-muted dark:text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -518,7 +521,7 @@ export default function DashboardPage() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-neutral-600 truncate">
+                        <p className="text-sm text-neutral-600 dark:text-primary/70 truncate">
                           {link.url}
                         </p>
                         {link.description && (

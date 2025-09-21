@@ -80,8 +80,8 @@ export default async function ProfilePage(props: {
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Show dashboard button if user is logged in and viewing their own profile */}
-        {isOwnProfile && (
-          <div className="flex mb-4 w-full justify-start gap-2">
+        <div className="flex mb-4 w-full items-center justify-between gap-2">
+          {isOwnProfile && (
             <Link href="/dashboard">
               <Button
                 variant="outline"
@@ -92,10 +92,9 @@ export default async function ProfilePage(props: {
                 Edit Profile
               </Button>
             </Link>
-
-            <ClientThemeToggle />
-          </div>
-        )}
+          )}
+          <ClientThemeToggle />
+        </div>
 
         {/* Profile Header */}
         <div className="text-center mb-8">
@@ -119,14 +118,14 @@ export default async function ProfilePage(props: {
             </AvatarFallback>
           </Avatar>
 
-          <h1 className="text-2xl font-bold text-black mb-1 text-balance">
+          <h1 className="text-2xl font-bold text-black dark:text-white mb-1 text-balance">
             {user.name}
           </h1>
 
-          <p className="text-sm text-gray-800 mb-3">@{user.username}</p>
+          <p className="text-sm text-primary mb-3">@{user.username}</p>
 
           {user.bio && (
-            <p className="text-foreground leading-relaxed text-pretty">
+            <p className="text-primary leading-relaxed text-pretty">
               {user.bio}
             </p>
           )}
@@ -192,7 +191,14 @@ export default async function ProfilePage(props: {
 
         {/* Footer */}
         <div className="text-center mt-12 pt-8 border-t border-border">
-          <p className="text-sm text-gray-600">Create your own link page</p>
+          <p className="text-sm text-gray-600 dark:text-white">
+            Create your own link page from{" "}
+            <span>
+              <Link href={"/signup"} className="underline font-medium">
+                here
+              </Link>
+            </span>
+          </p>
         </div>
       </div>
     </div>
