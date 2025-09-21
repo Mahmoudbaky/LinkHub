@@ -19,6 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import Link from "next/dist/client/link";
 
 const SignUpForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -143,9 +144,9 @@ const SignUpForm = () => {
       <div className="mt-4">
         <p className="text-sm text-center text-primary">
           Already have an account?{" "}
-          <a href="/signin" className="text-blue-600 hover:underline">
+          <Link href="/signin" className="text-blue-600 hover:underline">
             Sign In
-          </a>
+          </Link>
         </p>
       </div>
     </div>

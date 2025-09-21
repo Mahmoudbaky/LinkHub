@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/dist/client/link";
 
 export function SignInForm({
   className,
@@ -96,9 +97,9 @@ export function SignInForm({
       <div className="mt-4">
         <p className="text-sm text-center text-primary">
           Don't have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
+          <Link href="/signup" className="text-blue-600 hover:underline">
             Sign Up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
