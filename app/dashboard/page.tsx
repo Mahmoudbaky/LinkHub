@@ -531,7 +531,7 @@ export default function DashboardPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm text-muted">
+                      <div className="flex items-center gap-2 text-sm text-muted dark:text-muted-foreground">
                         <BarChart3 className="w-4 h-4" />
                         {link.clicks}
                       </div>

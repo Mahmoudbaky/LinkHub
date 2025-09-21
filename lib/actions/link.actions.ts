@@ -139,3 +139,20 @@ export const editLinkTheme = async (
     return { success: false, error: "Failed to update link theme" };
   }
 };
+
+export const incrementLinkClicks = async (id: string) => {
+  try {
+    const link = await prisma.link.update({
+      where: { id },
+      data: { clicks: { increment: 1 } },
+    });
+    return {
+      success: true,
+      message: "Link clicks incremented successfully",
+      data: link,
+    };
+  } catch (error) {
+    console.error("Error incrementing link clicks:", error);
+    return { success: false, error: "Failed to increment link clicks" };
+  }
+};

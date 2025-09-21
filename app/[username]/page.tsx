@@ -16,13 +16,14 @@ import { authOptions } from "@/lib/auth"; // Adjust path to your auth config
 import Link from "next/link";
 import { ClientThemeToggle } from "@/components/client-theme-toggle";
 import { UILink } from "@/types";
+import { ClickableLinkCard } from "@/components/clickable-link-card";
 
 export default async function ProfilePage(props: {
   params: Promise<{ username: string }>;
 }) {
   const { username } = await props.params;
   const session = await getServerSession(authOptions);
-  const user = await getUserByUserName(username); // In real app: await getUserByUsername(params.username)
+  const user = await getUserByUserName(username);
 
   // Check if the current session user is viewing their own profile
   const isOwnProfile = session?.user?.username === username;
@@ -153,38 +154,7 @@ export default async function ProfilePage(props: {
         {/* Links */}
         <div className="space-y-4">
           {activeLinks.map((link: UILink) => (
-            <Card key={link.id} className="p-0 overflow-hidden">
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  backgroundColor: link.backgroundColor || undefined,
-                }}
-                className={`block p-4 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 group`}
-              >
-                <div className="flex items-center">
-                  <div className="flex-1 flex items-center justify-center gap-3 min-w-0">
-                    {/* The logo */}
-                    {link.icon ? (
-                      <img src={link.icon} alt="logo" className="w-7 h-7" />
-                    ) : (
-                      <></>
-                    )}
-
-                    {/* The Text */}
-                    <h3
-                      style={{
-                        color: link.textColor || undefined,
-                      }}
-                      className={`font-semibold text-card-foreground group-hover:text-accent-foreground mb-1 text-balance`}
-                    >
-                      {link.title}
-                    </h3>
-                  </div>
-                </div>
-              </a>
-            </Card>
+            <ClickableLinkCard key={link.id} link={link} />
           ))}
         </div>
 

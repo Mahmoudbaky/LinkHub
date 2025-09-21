@@ -26,8 +26,8 @@ export default function RootLayout({
       <body className={`${rubik.className} antialiased`}>
         <NextAuthProvider>
           <ThemeProvider
-            attribute="class" // what is the deffrance between class and data-*
-            defaultTheme="light"
+            attribute="class"
+            defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
