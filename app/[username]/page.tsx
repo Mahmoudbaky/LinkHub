@@ -73,7 +73,7 @@ export default async function ProfilePage(props: {
 
   const activeLinks = user.links
     .filter((link: UILink) => link.isActive)
-    .sort((a, b) => a.position - b.position);
+    .sort((a: UILink, b: UILink) => a.position - b.position);
 
   return (
     <div className="min-h-screen bg-background">
