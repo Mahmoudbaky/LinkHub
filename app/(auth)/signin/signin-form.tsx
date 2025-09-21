@@ -40,7 +40,7 @@ export function SignInForm({
       if (result?.error) {
         setError("Invalid username or password");
       } else {
-        router.push("/"); // Redirect to your protected page
+        router.push("/dashboard"); // Redirect to your protected page
         router.refresh();
       }
     } catch (error) {
@@ -52,53 +52,47 @@ export function SignInForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign In to your account</CardTitle>
-          <CardDescription>
-            Enter your username and password to sign in.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-3">
-                {error && (
-                  <div className="text-red-500 text-sm text-center">
-                    {error}
-                  </div>
-                )}
-                <Button type="submit" className="w-full cursor-pointer">
-                  {loading ? "Signing In..." : "Sign In"}
-                </Button>
-              </div>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <p className="text-muted-foreground text-sm text-balance">
+            Enter your email below to login to your account
+          </p>
+        </div>
+        <div className="flex flex-col gap-8">
+          <div className="grid gap-3">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="grid gap-3">
+            <div className="flex items-center">
+              <Label htmlFor="password">Password</Label>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-3">
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+            <Button type="submit" className="w-full cursor-pointer">
+              {loading ? "Signing In..." : "Sign In"}
+            </Button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }
