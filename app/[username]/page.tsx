@@ -152,7 +152,7 @@ export default async function ProfilePage(props: {
 
         {/* Links */}
         <div className="space-y-4">
-          {activeLinks.map((link) => (
+          {activeLinks.map((link: UILink) => (
             <Card key={link.id} className="p-0 overflow-hidden">
               <a
                 href={link.url}
