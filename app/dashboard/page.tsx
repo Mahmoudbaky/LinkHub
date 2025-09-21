@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
             // Map database links to UI links
             const uiLinks: UILink[] =
-              userData.links?.map((link) => ({
+              userData.links?.map((link: UILink) => ({
                 id: link.id,
                 title: link.title,
                 url: link.url,
