@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique
+  username  String   @unique
+  password  String
+  name      String?
+  bio       String?
+  avatar    String? // URL to profile image
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User customization options
+  theme           String  @default("default") // Theme for their page
+  backgroundColor String? // Custom background color
+  textColor       String? // Custom text color
+
+  // Social links (optional)
+  instagram String?
+  twitter   String?
+  linkedin  String?
+  youtube   String?
+  facebook  String?
+  tiktok    String?
+
+  // Relations
+  links   Link[]
+  Session Session[]
+
+  @@map("users")
+}
+
+model Link {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  url         String
+  description String?
+  position    Int      @default(0) // For ordering links
+  isActive    Boolean  @default(true)
+  clicks      Int      @default(0) // Track click count
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // theme related
+  icon            String? // URL to custom icon or icon name
+  backgroundColor String? // Custom background color for the link
+  textColor       String? // Custom text color for the link
+
+  // Relations
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([position])
+  @@map("links")
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
