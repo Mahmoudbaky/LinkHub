@@ -46,20 +46,22 @@ model User {
 }
 
 model Link {
-  id          String   @id @default(cuid())
-  title       String
-  url         String
-  description String?
-  position    Int      @default(0) // For ordering links
-  isActive    Boolean  @default(true)
-  clicks      Int      @default(0) // Track click count
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  url            String
+  description    String?
+  position       Int      @default(0) // For ordering links
+  isActive       Boolean  @default(true)
+  clicks         Int      @default(0) // Track click count
+  appearInSlider Boolean  @default(false) // Whether to show in slider
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // theme related
   icon            String? // URL to custom icon or icon name
   backgroundColor String? // Custom background color for the link
   textColor       String? // Custom text color for the link
+  bannerImage     String? // URL to banner image for the link
 
   // Relations
   userId String
