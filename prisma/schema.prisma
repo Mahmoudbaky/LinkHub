@@ -9,9 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "sqlite"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "sqlite"
+  url      = "file:../database/app.db"
 }
 
 model User {
