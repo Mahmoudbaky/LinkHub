@@ -41,7 +41,7 @@ export function SignInForm({
       if (result?.error) {
         setError("Invalid username or password");
       } else {
-        router.push("/dashboard"); // Redirect to your protected page
+        router.push("/"); // Redirect to your protected page
         router.refresh();
       }
     } catch (error) {

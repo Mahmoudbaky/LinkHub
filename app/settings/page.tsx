@@ -318,7 +318,7 @@ export default function SettingsPage() {
               Manage your account and profile settings
             </p>
           </div>
-          <NextLink href="/dashboard">
+          <NextLink href="/">
             <Button className="cursor-pointer" variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard

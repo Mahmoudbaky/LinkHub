@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
@@ -14,8 +13,8 @@ import { getUserByUserName } from "@/lib/actions/user.actions";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth"; // Adjust path to your auth config
 import Link from "next/link";
-import { ClientThemeToggle } from "@/components/client-theme-toggle";
 import { UILink } from "@/types";
+import { ClientThemeToggle } from "@/components/client-theme-toggle";
 import { ClickableLinkCard } from "@/components/clickable-link-card";
 
 export default async function ProfilePage(props: {
@@ -82,7 +81,7 @@ export default async function ProfilePage(props: {
         {/* Show dashboard button if user is logged in and viewing their own profile */}
         <div className="flex mb-4 w-full items-center justify-between gap-2">
           {isOwnProfile && (
-            <Link href="/dashboard">
+            <Link href="/">
               <Button
                 variant="outline"
                 size="sm"

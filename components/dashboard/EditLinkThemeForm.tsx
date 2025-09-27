@@ -152,15 +152,12 @@ const EditLinkThemeForm = ({
                 <FormControl>
                   <div className="space-y-2">
                     {currentIcon && (
-                      <div className="flex items-center space-x-2 p-2 border rounded">
+                      <div className="flex w-[200px] items-center justify-between space-x-2 p-2 border rounded">
                         <img
                           src={currentIcon}
                           alt="Current icon"
-                          className="w-8 h-8 object-cover rounded"
+                          className="w-9 h-9 object-cover rounded"
                         />
-                        <span className="text-sm text-gray-600 flex-1 truncate">
-                          {currentIcon}
-                        </span>
                         <Button
                           type="button"
                           variant="outline"

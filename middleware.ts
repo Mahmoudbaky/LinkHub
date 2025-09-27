@@ -1,4 +1,5 @@
 import { withAuth } from "next-auth/middleware";
+import { redirect } from "next/dist/server/api-utils";
 
 export default withAuth(
   function middleware(req) {
@@ -13,5 +14,5 @@ export default withAuth(
 
 // Protect these routes
 export const config = {
-  matcher: ["/"],
+  matcher: ["/", "/dashboard/:path*", "/settings/:path*"],
 };

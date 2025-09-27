@@ -35,7 +35,7 @@ export const createLink = async (data: z.infer<typeof createLinkSchema>) => {
     });
 
     // Revalidate the dashboard page
-    revalidatePath("/dashboard");
+    revalidatePath("/");
 
     return { success: true, message: "Link created successfully", data: link };
   } catch (error) {

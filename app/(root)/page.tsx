@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,8 +61,6 @@ export default function DashboardPage() {
   const [editingLinkTheme, setEditingLinkTheme] = useState<UILink | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  console.log("Links state:", links);
 
   useEffect(() => {
     const fetchUser = async () => {

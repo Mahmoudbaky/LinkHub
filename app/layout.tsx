@@ -5,7 +5,7 @@ import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from "@/lib/constants";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const rubik = Rubik({ subsets: ["arabic"] });
+const rubik = Rubik({ subsets: ["latin"] });
 
 export const metadata = {
   title: {
