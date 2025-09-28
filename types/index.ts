@@ -69,3 +69,23 @@ export interface UILink {
   appearInSlider: boolean;
   bannerImage: string | null;
 }
+
+export interface ContrastValidationResult {
+  isValid: boolean;
+  ratio: number;
+  level: "AAA" | "AA" | "Fail";
+  message: string;
+}
+export interface ThemeValidationResult {
+  backgroundText: ContrastValidationResult;
+  backgroundTitle: ContrastValidationResult;
+  isValidTheme: boolean;
+  errors: string[];
+}
+
+export interface ColorSuggestion {
+  color: string;
+  label: string;
+  ratio: string;
+  method: string;
+}

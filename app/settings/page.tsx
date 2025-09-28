@@ -15,8 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -27,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +40,6 @@ import {
 import {
   User as UserIcon,
   Palette,
-  Shield,
   Bell,
   Trash2,
   Upload,
@@ -53,11 +51,13 @@ import {
   ArrowLeft,
   Facebook,
   TvMinimalPlay,
+  AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import NextLink from "next/link";
 import { toast } from "sonner";
 import { User } from "@/types";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import {
   getUserById,
   updateUserProfileInfo,
@@ -70,40 +70,25 @@ import {
   updateUserSocialLinksSchema,
   updateUserAppearanceSchema,
 } from "@/lib/validators";
-import { title } from "process";
+import { validateThemeColors, generateColorSuggestions } from "@/lib/utils";
+import { ThemeValidationResult, ColorSuggestion } from "@/types";
 
 type UserProfileFormData = z.infer<typeof updateUserProfileSchema>;
 type UserSocialLinksFormData = z.infer<typeof updateUserSocialLinksSchema>;
 type UserAppearanceFormData = z.infer<typeof updateUserAppearanceSchema>;
-
-// Mock user data
-// const mockUser = {
-//   id: "1",
-//   username: "johndoe",
-//   name: "John Doe",
-//   email: "john@example.com",
-//   bio: "Digital creator, entrepreneur, and coffee enthusiast. Sharing my journey and favorite resources.",
-//   avatar: "/placeholder.svg?key=119qd",
-//   theme: "default",
-//   backgroundColor: "#ffffff",
-//   textColor: "#1f2937",
-//   instagram: "https://instagram.com/johndoe",
-//   twitter: "https://twitter.com/johndoe",
-//   linkedin: "https://linkedin.com/in/johndoe",
-//   youtube: "",
-//   facebook: "",
-//   tiktok: "",
-//   emailNotifications: true,
-//   profilePublic: true,
-//   showClickCounts: false,
-// };
 
 export default function SettingsPage() {
   // const [user, setUser] = useState(mockUser);
   const { data: session } = useSession();
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<string>("");
+  const [themeValidation, setThemeValidation] =
+    useState<ThemeValidationResult | null>(null);
+  const [colorSuggestions, setColorSuggestions] = useState<{
+    textSuggestions: ColorSuggestion[];
+    titleSuggestions: ColorSuggestion[];
+  }>({ textSuggestions: [], titleSuggestions: [] });
+  const [showContrastWarning, setShowContrastWarning] = useState(false);
 
   // Initialize React Hook Form for Profile
   const {
@@ -164,6 +149,51 @@ export default function SettingsPage() {
   const watchedBio = watch("bio");
   const watchedAvatar = watch("avatar");
 
+  // Watch appearance colors for validation
+  const watchedBackgroundColor = watchAppearance("backgroundColor");
+  const watchedTitleColor = watchAppearance("titleColor");
+  const watchedTextColor = watchAppearance("textColor");
+
+  // Validate theme colors whenever they change
+  useEffect(() => {
+    if (watchedBackgroundColor && watchedTitleColor && watchedTextColor) {
+      try {
+        const validation = validateThemeColors(
+          watchedBackgroundColor,
+          watchedTextColor,
+          watchedTitleColor
+        );
+
+        setThemeValidation(validation);
+
+        // Generate suggestions for colors that fail validation
+        const suggestions = {
+          textSuggestions: !validation.backgroundText.isValid
+            ? generateColorSuggestions(
+                watchedBackgroundColor,
+                watchedTextColor,
+                3
+              )
+            : [],
+          titleSuggestions: !validation.backgroundTitle.isValid
+            ? generateColorSuggestions(
+                watchedBackgroundColor,
+                watchedTitleColor,
+                3
+              )
+            : [],
+        };
+
+        setColorSuggestions(suggestions);
+        setShowContrastWarning(!validation.isValidTheme);
+      } catch (error) {
+        console.error("Color validation error:", error);
+        setThemeValidation(null);
+        setShowContrastWarning(false);
+      }
+    }
+  }, [watchedBackgroundColor, watchedTitleColor, watchedTextColor]);
+
   useEffect(() => {
     const fetchUser = async () => {
       if (session?.user?.id) {
@@ -218,20 +248,6 @@ export default function SettingsPage() {
               titleColor: userData.titleColor || "#1f2937",
               textColor: userData.textColor || "#1f2937",
             });
-
-            // Map database links to UI links
-            // const uiLinks: UILink[] =
-            //   userData.links?.map((link) => ({
-            //     id: link.id,
-            //     title: link.title,
-            //     url: link.url,
-            //     description: link.description,
-            //     icon: link.icon,
-            //     position: link.position,
-            //     isActive: link.isActive,
-            //     clicks: link.clicks,
-            //   })) || [];
-            // setLinks(uiLinks);
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error);
@@ -333,6 +349,23 @@ export default function SettingsPage() {
       toast.error("User not authenticated");
       return;
     }
+
+    // Check for contrast issues before submitting
+    if (themeValidation && !themeValidation.isValidTheme) {
+      const proceed = window.confirm(
+        `⚠️ Accessibility Warning\n\n` +
+          `Your current color combination may not meet accessibility standards:\n\n` +
+          themeValidation.errors.join("\n") +
+          `\n\nThis could make your profile difficult to read for some users. ` +
+          `Do you want to save these settings anyway?\n\n` +
+          `Click Cancel to review the suggested colors above, or OK to proceed.`
+      );
+
+      if (!proceed) {
+        return;
+      }
+    }
+
     console.log("Appearance data to update:", data);
     try {
       await updateUserTheme(session.user.id, data);
@@ -350,7 +383,13 @@ export default function SettingsPage() {
           : null
       );
 
-      toast.success("Appearance updated successfully!");
+      if (themeValidation?.isValidTheme) {
+        toast.success(
+          "Appearance updated successfully with great accessibility!"
+        );
+      } else {
+        toast.success("Appearance updated successfully!");
+      }
     } catch (error) {
       console.error("Failed to update appearance:", error);
       toast.error("Failed to update appearance. Please try again.");
@@ -373,7 +412,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Manage your account and profile settings
             </p>
           </div>
@@ -421,7 +460,7 @@ export default function SettingsPage() {
                 >
                   {/* Avatar */}
                   <div className="flex items-center gap-6">
-                    <Avatar className="w-20 h-20 ring-2 ring-gray-200 ring-offset-2">
+                    <Avatar className="w-20 h-20">
                       <AvatarImage
                         src={
                           watchedAvatar || user?.avatar || "/placeholder.svg"
@@ -821,6 +860,109 @@ export default function SettingsPage() {
                       )}
                     </div>
                   </div>
+
+                  {/* Contrast Validation Warnings */}
+                  {showContrastWarning && themeValidation && (
+                    <div className="space-y-4">
+                      {themeValidation.errors.map((error, index) => (
+                        <Alert key={index} variant="destructive">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>Accessibility Warning</AlertTitle>
+                          <AlertDescription className="space-y-2">
+                            <p>{error}</p>
+
+                            {/* Show suggestions for text color */}
+                            {error.includes("Text color") &&
+                              colorSuggestions.textSuggestions.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="text-sm font-medium mb-2">
+                                    Suggested text colors:
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {colorSuggestions.textSuggestions.map(
+                                      (suggestion, idx) => (
+                                        <button
+                                          key={idx}
+                                          type="button"
+                                          onClick={() =>
+                                            setValueAppearance(
+                                              "textColor",
+                                              suggestion.color
+                                            )
+                                          }
+                                          className="flex items-center gap-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                                        >
+                                          <div
+                                            className="w-4 h-4 rounded-full border"
+                                            style={{
+                                              backgroundColor: suggestion.color,
+                                            }}
+                                          />
+                                          {suggestion.label} ({suggestion.ratio}
+                                          :1)
+                                        </button>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                            {/* Show suggestions for title color */}
+                            {error.includes("Title color") &&
+                              colorSuggestions.titleSuggestions.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="text-sm font-medium mb-2">
+                                    Suggested title colors:
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {colorSuggestions.titleSuggestions.map(
+                                      (suggestion, idx) => (
+                                        <button
+                                          key={idx}
+                                          type="button"
+                                          onClick={() =>
+                                            setValueAppearance(
+                                              "titleColor",
+                                              suggestion.color
+                                            )
+                                          }
+                                          className="flex items-center gap-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                                        >
+                                          <div
+                                            className="w-4 h-4 rounded-full border"
+                                            style={{
+                                              backgroundColor: suggestion.color,
+                                            }}
+                                          />
+                                          {suggestion.label} ({suggestion.ratio}
+                                          :1)
+                                        </button>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                          </AlertDescription>
+                        </Alert>
+                      ))}
+
+                      {/* Show validation success */}
+                      {themeValidation.isValidTheme && (
+                        <Alert>
+                          <CheckCircle className="h-4 w-4" />
+                          <AlertTitle>Great Accessibility!</AlertTitle>
+                          <AlertDescription>
+                            Your color combination meets accessibility
+                            standards. Text contrast:{" "}
+                            {themeValidation.backgroundText.ratio}:1 (
+                            {themeValidation.backgroundText.level}), Title
+                            contrast: {themeValidation.backgroundTitle.ratio}:1
+                            ({themeValidation.backgroundTitle.level})
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-4 p-4 border rounded-lg">
                     <Eye className="w-5 h-5 text-white" />

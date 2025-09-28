@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
-  ExternalLink,
   Instagram,
   Twitter,
   Linkedin,
@@ -98,16 +97,20 @@ export default async function ProfilePage(props: {
           {isOwnProfile && (
             <Link href="/">
               <Button
+                style={{
+                  backgroundColor:
+                    user.theme === "dark" ? "#19252e" : "#f2f2f2",
+                }}
                 variant="outline"
                 size="sm"
-                className="w-full cursor-pointer"
+                className="w-full cursor-pointer border-none"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
             </Link>
           )}
-          <ClientThemeToggle />
+          {/* <ClientThemeToggle /> */}
         </div>
 
         {/* Profile Header */}
@@ -154,10 +157,10 @@ export default async function ProfilePage(props: {
                   href={url || ""}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-full bg-card transition-colors duration-200"
+                  className="p-3 rounded-full"
                   aria-label={label}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-7 h-7" />
                 </a>
               );
             })}
@@ -176,7 +179,12 @@ export default async function ProfilePage(props: {
 
         {/* Footer */}
         <div className="text-center mt-12 pt-8 border-t border-border">
-          <p className="text-sm text-gray-600 dark:text-white">
+          <p
+            style={{
+              color: user.theme === "dark" ? "#ffffff" : "#4b5563",
+            }}
+            className="text-sm text-gray-600 dark:text-white"
+          >
             Create your own link page from{" "}
             <span>
               <Link href={"/signup"} className="underline font-medium">
