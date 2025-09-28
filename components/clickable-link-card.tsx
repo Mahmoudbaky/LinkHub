@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { UILink } from "@/types";
 import { incrementLinkClicks } from "@/lib/actions/link.actions";
+import Image from "next/image";
 
 interface ClickableLinkCardProps {
   link: UILink;
@@ -37,7 +38,7 @@ export function ClickableLinkCard({ link }: ClickableLinkCardProps) {
           <div className="flex-1 flex items-center justify-center gap-3 min-w-0">
             {/* The logo */}
             {link.icon ? (
-              <img src={link.icon} alt="logo" className="w-7 h-7" />
+              <Image src={link.icon} alt="logo" className="w-7 h-7" />
             ) : (
               <></>
             )}

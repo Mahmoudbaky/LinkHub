@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { UILink } from "@/types";
 import { incrementLinkClicks } from "@/lib/actions/link.actions";
+import Image from "next/image";
 
 interface FeaturedLinksSliderProps {
   sliderLinks: UILink[];
@@ -56,7 +57,7 @@ export function FeaturedLinksSlider({ sliderLinks }: FeaturedLinksSliderProps) {
               onClick={() => handleSlideClick(link)}
             >
               <div className="relative h-48 rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={link.bannerImage || ""}
                   alt={link.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
