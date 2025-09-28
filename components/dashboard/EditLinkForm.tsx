@@ -17,7 +17,7 @@ import { UILink } from "@/types";
 import { useState } from "react";
 import { toast } from "sonner";
 import { UploadButton } from "@/config/uploadthing";
-import Image from "next/image";
+// import Image from "next/image";
 
 const EditLinkForm = ({
   link,
@@ -113,7 +113,7 @@ const EditLinkForm = ({
               <Label>Banner Image</Label>
               {editedLink.bannerImage && (
                 <div className="relative">
-                  <Image
+                  <img
                     src={editedLink.bannerImage}
                     alt="Current banner"
                     className="w-full h-32 object-cover rounded-md border"

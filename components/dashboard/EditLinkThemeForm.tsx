@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { linkThemeSchema } from "@/lib/validators";
-import Image from "next/image";
+// import Image from "next/image";
 
 const EditLinkThemeForm = ({
   link,
@@ -154,7 +154,7 @@ const EditLinkThemeForm = ({
                   <div className="space-y-2">
                     {currentIcon && (
                       <div className="flex w-[200px] items-center justify-between space-x-2 p-2 border rounded">
-                        <Image
+                        <img
                           src={currentIcon}
                           alt="Current icon"
                           className="w-9 h-9 object-cover rounded"

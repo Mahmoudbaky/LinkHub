@@ -1,4 +1,4 @@
-import Image from "next/image";
+// import Image from "next/image";
 import SignUpForm from "./signup-form";
 export default function Page() {
   return (
@@ -11,7 +11,7 @@ export default function Page() {
         </div>
       </div>
       <div className="bg-muted relative hidden lg:block">
-        <Image
+        <img
           src="/placeholder.svg"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
