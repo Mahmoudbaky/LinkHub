@@ -4,6 +4,11 @@
 @import "uploadthing/tw/v4";
 @source "../node_modules/@uploadthing/react/dist";
 
+/* Swiper styles */
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

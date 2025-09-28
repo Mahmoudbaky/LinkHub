@@ -93,7 +93,7 @@ export default function DashboardPage() {
 
             // Map database links to UI links
             const uiLinks: UILink[] =
-              userData.links?.map((link: UILink) => ({
+              userData.links?.map((link: any) => ({
                 id: link.id,
                 title: link.title,
                 url: link.url,
@@ -104,6 +104,8 @@ export default function DashboardPage() {
                 clicks: link.clicks,
                 backgroundColor: link.backgroundColor,
                 textColor: link.textColor,
+                appearInSlider: link.appearInSlider || false,
+                bannerImage: link.bannerImage,
               })) || [];
             setLinks(uiLinks);
           }
@@ -189,6 +191,8 @@ export default function DashboardPage() {
           clicks: result.data.clicks,
           backgroundColor: result.data.backgroundColor,
           textColor: result.data.textColor,
+          appearInSlider: result.data.appearInSlider || false,
+          bannerImage: result.data.bannerImage,
         };
 
         setLinks([...links, newUILink]);
@@ -205,11 +209,14 @@ export default function DashboardPage() {
   };
 
   const handleEditLink = async (link: UILink) => {
+    console.log("handleEditLink called with link:", link);
     try {
       const result = await editLink(link.id, {
         title: link.title,
         url: link.url,
         description: link.description || undefined,
+        appearInSlider: link.appearInSlider,
+        bannerImage: link.bannerImage,
       });
 
       if (result.success && result.data) {
@@ -225,6 +232,8 @@ export default function DashboardPage() {
           clicks: result.data.clicks,
           backgroundColor: result.data.backgroundColor,
           textColor: result.data.textColor,
+          appearInSlider: result.data.appearInSlider || false,
+          bannerImage: result.data.bannerImage,
         };
 
         const updatedLinks = links.map((l) =>
@@ -307,15 +316,21 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div className="flex items-center gap-4 mb-4 sm:mb-0">
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-18 h-18 ">
               <AvatarImage
-                src={user.avatar || "/placeholder.svg"}
-                alt={user.name || "User"}
+                src={user?.avatar || "/placeholder.svg"}
+                alt={user?.username || "User Avatar"}
+                className="object-cover object-center"
+                style={{
+                  imageRendering: "auto",
+                  WebkitBackfaceVisibility: "hidden",
+                  backfaceVisibility: "hidden",
+                }}
               />
-              <AvatarFallback>
-                {(user.name || user.username || "U")
-                  .split(" ")
-                  .map((n) => n[0])
+              <AvatarFallback className="text-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                {user?.name
+                  ?.split(" ")
+                  .map((n: string) => n[0])
                   .join("")
                   .toUpperCase()}
               </AvatarFallback>

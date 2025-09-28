@@ -28,6 +28,8 @@ export const createLinkSchema = z.object({
   url: z.string().url("Invalid URL format"),
   description: z.string().optional(),
   userId: z.string(),
+  appearInSlider: z.boolean().default(false).optional(),
+  bannerImage: z.string().nullable().optional(),
 });
 
 export const updateUserProfileSchema = z.object({
@@ -90,4 +92,10 @@ export const linkThemeSchema = z.object({
   backgroundColor: z.string().nullable().optional(),
   textColor: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
+});
+
+// Zod schema for link slider settings validation
+export const linkSliderSchema = z.object({
+  appearInSlider: z.boolean(),
+  bannerImage: z.string().nullable().optional(),
 });

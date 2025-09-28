@@ -3,7 +3,7 @@
 import { prisma } from "@/db/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createLinkSchema } from "@/lib/validators";
+import { createLinkSchema, linkSliderSchema } from "@/lib/validators";
 
 export const createLink = async (data: z.infer<typeof createLinkSchema>) => {
   try {
@@ -78,11 +78,29 @@ export const editLink = async (
   id: string,
   data: Partial<z.infer<typeof createLinkSchema>>
 ) => {
+  console.log("Editing link in action:", id, data);
   try {
+    // First check if the link exists
+    const existingLink = await prisma.link.findUnique({
+      where: { id },
+    });
+
+    if (!existingLink) {
+      console.error("Link not found with ID:", id);
+      return {
+        success: false,
+        error: "Link not found. Please refresh the page and try again.",
+      };
+    }
+
     const link = await prisma.link.update({
       where: { id },
       data,
     });
+
+    // Revalidate the page to refresh the data
+    revalidatePath("/");
+
     return { success: true, message: "Link updated successfully", data: link };
   } catch (error) {
     console.error("Error updating link:", error);
@@ -154,5 +172,25 @@ export const incrementLinkClicks = async (id: string) => {
   } catch (error) {
     console.error("Error incrementing link clicks:", error);
     return { success: false, error: "Failed to increment link clicks" };
+  }
+};
+
+export const updateLinkSliderSettings = async (
+  id: string,
+  data: z.infer<typeof linkSliderSchema>
+) => {
+  try {
+    const link = await prisma.link.update({
+      where: { id },
+      data,
+    });
+    return {
+      success: true,
+      message: "Link slider settings updated successfully",
+      data: link,
+    };
+  } catch (error) {
+    console.error("Error updating link slider settings:", error);
+    return { success: false, error: "Failed to update link slider settings" };
   }
 };

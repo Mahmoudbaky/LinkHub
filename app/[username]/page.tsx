@@ -16,6 +16,7 @@ import Link from "next/link";
 import { UILink } from "@/types";
 import { ClientThemeToggle } from "@/components/client-theme-toggle";
 import { ClickableLinkCard } from "@/components/clickable-link-card";
+import { FeaturedLinksSlider } from "@/components/featured-links-slider";
 
 export default async function ProfilePage(props: {
   params: Promise<{ username: string }>;
@@ -72,7 +73,14 @@ export default async function ProfilePage(props: {
   ].filter((link) => link.url);
 
   const activeLinks = user.links
-    .filter((link: UILink) => link.isActive)
+    .filter((link: UILink) => link.isActive && !link.appearInSlider)
+    .sort((a: UILink, b: UILink) => a.position - b.position);
+
+  // Filter links for the slider - those with appearInSlider true and have banner images
+  const sliderLinks = user.links
+    .filter(
+      (link: UILink) => link.isActive && link.appearInSlider && link.bannerImage
+    )
     .sort((a: UILink, b: UILink) => a.position - b.position);
 
   return (
@@ -97,7 +105,7 @@ export default async function ProfilePage(props: {
 
         {/* Profile Header */}
         <div className="text-center mb-8">
-          <Avatar className="w-24 h-24 ring-2 mb-4 mx-auto ring-gray-200 ring-offset-2">
+          <Avatar className="w-24 h-24 mb-4 mx-auto">
             <AvatarImage
               src={user?.avatar || "/placeholder.svg"}
               alt={user?.username || "User Avatar"}
@@ -149,6 +157,9 @@ export default async function ProfilePage(props: {
             })}
           </div>
         )}
+
+        {/* Featured Links Slider */}
+        <FeaturedLinksSlider sliderLinks={sliderLinks} />
 
         {/* Links */}
         <div className="space-y-4">

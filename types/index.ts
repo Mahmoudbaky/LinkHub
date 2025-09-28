@@ -36,6 +36,8 @@ export type Link = {
   position: number; // For ordering links
   isActive: boolean;
   clicks: number; // Track click count
+  appearInSlider: boolean; // Whether to show in slider
+  bannerImage: string | null; // URL to banner image for the link
   createdAt: Date;
   updatedAt: Date;
 
@@ -63,4 +65,6 @@ export interface UILink {
   clicks: number;
   backgroundColor: string | null;
   textColor: string | null;
+  appearInSlider: boolean;
+  bannerImage: string | null;
 }
