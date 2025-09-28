@@ -1,8 +1,9 @@
 "use server";
 import { prisma } from "@/db/prisma";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
 
-import { createUserSchema } from "../validators";
+import { createUserSchema, updateUserAppearanceSchema } from "../validators";
 
 // Register new user
 export const registerUser = async (formData: {
@@ -127,5 +128,20 @@ export const updateUserSocialLinks = async (
     return res;
   } catch (error) {
     console.error("Failed to update user social links:", error);
+  }
+};
+
+export const updateUserTheme = async (
+  id: string,
+  data: z.infer<typeof updateUserAppearanceSchema>
+) => {
+  try {
+    const res = await prisma.user.update({
+      where: { id },
+      data,
+    });
+    return res;
+  } catch (error) {
+    console.error("Failed to update user theme:", error);
   }
 };

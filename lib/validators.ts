@@ -38,6 +38,13 @@ export const updateUserProfileSchema = z.object({
   avatar: z.string().optional(),
 });
 
+export const updateUserAppearanceSchema = z.object({
+  theme: z.string().optional(),
+  backgroundColor: z.string().nullable().optional(),
+  textColor: z.string().nullable().optional(),
+  titleColor: z.string().nullable().optional(),
+});
+
 export const updateUserSocialLinksSchema = z.object({
   facebook: z
     .string()

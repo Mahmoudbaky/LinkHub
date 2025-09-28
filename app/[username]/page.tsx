@@ -8,6 +8,7 @@ import {
   Youtube,
   Facebook,
   Settings,
+  TvMinimalPlay,
 } from "lucide-react";
 import { getUserByUserName } from "@/lib/actions/user.actions";
 import { getServerSession } from "next-auth/next";
@@ -67,7 +68,7 @@ export default async function ProfilePage(props: {
     {
       platform: "tiktok",
       url: user.tiktok,
-      icon: ExternalLink,
+      icon: TvMinimalPlay,
       label: "TikTok",
     },
   ].filter((link) => link.url);
@@ -84,7 +85,13 @@ export default async function ProfilePage(props: {
     .sort((a: UILink, b: UILink) => a.position - b.position);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      style={{
+        background: user.backgroundColor || "var(--background)",
+        color: user.textColor || "var(--foreground)",
+      }}
+      className="min-h-screen "
+    >
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Show dashboard button if user is logged in and viewing their own profile */}
         <div className="flex mb-4 w-full items-center justify-between gap-2">
@@ -125,16 +132,15 @@ export default async function ProfilePage(props: {
             </AvatarFallback>
           </Avatar>
 
-          <h1 className="text-2xl font-bold text-black dark:text-white mb-1 text-balance">
+          <h1
+            style={{ color: user.titleColor || "var(--foreground)" }}
+            className="text-2xl font-bold text-black dark:text-white mb-1 text-balance"
+          >
             {user.name}
           </h1>
 
-          <p className="text-sm text-primary mb-3">@{user.username}</p>
-
           {user.bio && (
-            <p className="text-primary leading-relaxed text-pretty">
-              {user.bio}
-            </p>
+            <p className="leading-relaxed text-pretty">{user.bio}</p>
           )}
         </div>
 
@@ -148,7 +154,7 @@ export default async function ProfilePage(props: {
                   href={url || ""}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-full bg-card hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                  className="p-3 rounded-full bg-card transition-colors duration-200"
                   aria-label={label}
                 >
                   <Icon className="w-5 h-5" />

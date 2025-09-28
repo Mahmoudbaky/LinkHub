@@ -28,6 +28,7 @@ model User {
   // User customization options
   theme           String  @default("default") // Theme for their page
   backgroundColor String? // Custom background color
+  titleColor      String? // Custom title color
   textColor       String? // Custom text color
 
   // Social links (optional)

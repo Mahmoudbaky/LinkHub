@@ -62,37 +62,41 @@ import {
   getUserById,
   updateUserProfileInfo,
   updateUserSocialLinks,
+  updateUserTheme,
 } from "@/lib/actions/user.actions";
 import { UploadButton } from "@/config/uploadthing";
 import {
   updateUserProfileSchema,
   updateUserSocialLinksSchema,
+  updateUserAppearanceSchema,
 } from "@/lib/validators";
+import { title } from "process";
 
 type UserProfileFormData = z.infer<typeof updateUserProfileSchema>;
 type UserSocialLinksFormData = z.infer<typeof updateUserSocialLinksSchema>;
+type UserAppearanceFormData = z.infer<typeof updateUserAppearanceSchema>;
 
 // Mock user data
-const mockUser = {
-  id: "1",
-  username: "johndoe",
-  name: "John Doe",
-  email: "john@example.com",
-  bio: "Digital creator, entrepreneur, and coffee enthusiast. Sharing my journey and favorite resources.",
-  avatar: "/placeholder.svg?key=119qd",
-  theme: "default",
-  backgroundColor: "#ffffff",
-  textColor: "#1f2937",
-  instagram: "https://instagram.com/johndoe",
-  twitter: "https://twitter.com/johndoe",
-  linkedin: "https://linkedin.com/in/johndoe",
-  youtube: "",
-  facebook: "",
-  tiktok: "",
-  emailNotifications: true,
-  profilePublic: true,
-  showClickCounts: false,
-};
+// const mockUser = {
+//   id: "1",
+//   username: "johndoe",
+//   name: "John Doe",
+//   email: "john@example.com",
+//   bio: "Digital creator, entrepreneur, and coffee enthusiast. Sharing my journey and favorite resources.",
+//   avatar: "/placeholder.svg?key=119qd",
+//   theme: "default",
+//   backgroundColor: "#ffffff",
+//   textColor: "#1f2937",
+//   instagram: "https://instagram.com/johndoe",
+//   twitter: "https://twitter.com/johndoe",
+//   linkedin: "https://linkedin.com/in/johndoe",
+//   youtube: "",
+//   facebook: "",
+//   tiktok: "",
+//   emailNotifications: true,
+//   profilePublic: true,
+//   showClickCounts: false,
+// };
 
 export default function SettingsPage() {
   // const [user, setUser] = useState(mockUser);
@@ -100,8 +104,6 @@ export default function SettingsPage() {
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState<string>("");
-
-  console.log("Session data:", session);
 
   // Initialize React Hook Form for Profile
   const {
@@ -117,6 +119,27 @@ export default function SettingsPage() {
       name: "",
       bio: "",
       avatar: "",
+    },
+  });
+
+  // Initialize React Hook Form for Appearance
+  const {
+    register: registerAppearance,
+    handleSubmit: handleSubmitAppearance,
+    formState: {
+      errors: appearanceErrors,
+      isSubmitting: isSubmittingAppearance,
+    },
+    setValue: setValueAppearance,
+    watch: watchAppearance,
+    reset: resetAppearance,
+  } = useForm<UserAppearanceFormData>({
+    resolver: zodResolver(updateUserAppearanceSchema),
+    defaultValues: {
+      theme: "default",
+      backgroundColor: "#ffffff",
+      titleColor: "#1f2937",
+      textColor: "#1f2937",
     },
   });
 
@@ -158,6 +181,7 @@ export default function SettingsPage() {
               avatar: userData.avatar,
               theme: userData.theme,
               backgroundColor: userData.backgroundColor,
+              titleColor: userData.titleColor,
               textColor: userData.textColor,
               instagram: userData.instagram,
               twitter: userData.twitter,
@@ -187,6 +211,14 @@ export default function SettingsPage() {
               youtube: userData.youtube || "",
             });
 
+            // Populate appearance form
+            resetAppearance({
+              theme: userData.theme || "dark",
+              backgroundColor: userData.backgroundColor || "#ffffff",
+              titleColor: userData.titleColor || "#1f2937",
+              textColor: userData.textColor || "#1f2937",
+            });
+
             // Map database links to UI links
             // const uiLinks: UILink[] =
             //   userData.links?.map((link) => ({
@@ -212,7 +244,7 @@ export default function SettingsPage() {
     };
 
     fetchUser();
-  }, [session?.user?.id, reset, resetSocial]);
+  }, [session?.user?.id, reset, resetSocial, resetAppearance]);
 
   const handleSave = async (section: string) => {
     setIsLoading(true);
@@ -296,14 +328,41 @@ export default function SettingsPage() {
     }
   };
 
+  const onSubmitAppearance = async (data: UserAppearanceFormData) => {
+    if (!session?.user?.id) {
+      toast.error("User not authenticated");
+      return;
+    }
+    console.log("Appearance data to update:", data);
+    try {
+      await updateUserTheme(session.user.id, data);
+
+      // Update local user state
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              theme: data.theme,
+              backgroundColor: data.backgroundColor,
+              titleColor: data.titleColor,
+              textColor: data.textColor,
+            }
+          : null
+      );
+
+      toast.success("Appearance updated successfully!");
+    } catch (error) {
+      console.error("Failed to update appearance:", error);
+      toast.error("Failed to update appearance. Please try again.");
+    }
+  };
+
   const handleDeleteAccount = () => {
     toast("Account deletion would be processed here.");
   };
 
   const themes = [
-    { value: "default", label: "Default" },
-    { value: "minimal", label: "Minimal" },
-    { value: "gradient", label: "Gradient" },
+    { value: "light", label: "Light" },
     { value: "dark", label: "Dark" },
   ];
 
@@ -635,95 +694,153 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="theme">Theme</Label>
-                  <Select
-                    value={user?.theme}
-                    onValueChange={(value) =>
-                      setUser({ ...user, theme: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {themes.map((theme) => (
-                        <SelectItem key={theme.value} value={theme.value}>
-                          {theme.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="backgroundColor">Background Color</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="backgroundColor"
-                        type="color"
-                        value={user?.backgroundColor as string}
-                        onChange={(e) =>
-                          setUser({ ...user, backgroundColor: e.target.value })
-                        }
-                        className="w-12 h-10 p-1 border rounded"
-                      />
-                      <Input
-                        value={user?.backgroundColor as string}
-                        onChange={(e) =>
-                          setUser({ ...user, backgroundColor: e.target.value })
-                        }
-                        placeholder="#ffffff"
-                        className="flex-1"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="textColor">Text Color</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="textColor"
-                        type="color"
-                        value={user?.textColor as string}
-                        onChange={(e) =>
-                          setUser({ ...user, textColor: e.target.value })
-                        }
-                        className="w-12 h-10 p-1 border rounded"
-                      />
-                      <Input
-                        value={user?.textColor as string}
-                        onChange={(e) =>
-                          setUser({ ...user, textColor: e.target.value })
-                        }
-                        placeholder="#1f2937"
-                        className="flex-1"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 p-4 border rounded-lg">
-                  <Eye className="w-5 h-5 text-muted" />
-                  <div>
-                    <p className="font-medium">Preview</p>
-                    <p className="text-sm text-muted">
-                      See how your profile will look
-                    </p>
-                  </div>
-                  <NextLink href={`/${user?.username}`} className="ml-auto">
-                    <Button variant="outline" size="sm">
-                      View Profile
-                    </Button>
-                  </NextLink>
-                </div>
-
-                <Button
-                  onClick={() => handleSave("appearance")}
-                  disabled={isLoading}
+                <form
+                  onSubmit={handleSubmitAppearance(onSubmitAppearance)}
+                  className="space-y-6"
                 >
-                  {isLoading ? "Saving..." : "Save Appearance"}
-                </Button>
+                  {/* Todo : Theme */}
+                  <div className="space-y-2">
+                    <Label htmlFor="theme">Theme</Label>
+                    <Select
+                      value={watchAppearance("theme")}
+                      onValueChange={(value) =>
+                        setValueAppearance("theme", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {themes.map((theme) => (
+                          <SelectItem key={theme.value} value={theme.value}>
+                            {theme.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="backgroundColor">Background Color</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="backgroundColor-color"
+                          type="color"
+                          {...registerAppearance("backgroundColor")}
+                          className={`w-12 h-10 p-1 border rounded ${
+                            appearanceErrors.backgroundColor
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        />
+                        <Input
+                          id="backgroundColor-text"
+                          type="text"
+                          value={watchAppearance("backgroundColor") || ""}
+                          onChange={(e) =>
+                            setValueAppearance(
+                              "backgroundColor",
+                              e.target.value
+                            )
+                          }
+                          placeholder="#ffffff"
+                          className={`flex-1 ${
+                            appearanceErrors.backgroundColor
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                      {appearanceErrors.backgroundColor && (
+                        <p className="text-sm text-red-500">
+                          {appearanceErrors.backgroundColor.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="titleColor">Title Color</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="titleColor-color"
+                          type="color"
+                          {...registerAppearance("titleColor")}
+                          className={`w-12 h-10 p-1 border rounded ${
+                            appearanceErrors.titleColor ? "border-red-500" : ""
+                          }`}
+                        />
+                        <Input
+                          id="titleColor-text"
+                          type="text"
+                          value={watchAppearance("titleColor") || ""}
+                          onChange={(e) =>
+                            setValueAppearance("titleColor", e.target.value)
+                          }
+                          placeholder="#1f2937"
+                          className={`flex-1 ${
+                            appearanceErrors.titleColor ? "border-red-500" : ""
+                          }`}
+                        />
+                      </div>
+                      {appearanceErrors.titleColor && (
+                        <p className="text-sm text-red-500">
+                          {appearanceErrors.titleColor.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="textColor">Text Color</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="textColor-color"
+                          type="color"
+                          {...registerAppearance("textColor")}
+                          className={`w-12 h-10 p-1 border rounded ${
+                            appearanceErrors.textColor ? "border-red-500" : ""
+                          }`}
+                        />
+                        <Input
+                          id="textColor-text"
+                          type="text"
+                          value={watchAppearance("textColor") || ""}
+                          onChange={(e) =>
+                            setValueAppearance("textColor", e.target.value)
+                          }
+                          placeholder="#1f2937"
+                          className={`flex-1 ${
+                            appearanceErrors.textColor ? "border-red-500" : ""
+                          }`}
+                        />
+                      </div>
+                      {appearanceErrors.textColor && (
+                        <p className="text-sm text-red-500">
+                          {appearanceErrors.textColor.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-4 border rounded-lg">
+                    <Eye className="w-5 h-5 text-white" />
+                    <div>
+                      <p className="font-medium">Preview</p>
+                      <p className="text-sm text-muted-foreground">
+                        See how your profile will look
+                      </p>
+                    </div>
+                    <NextLink href={`/${user?.username}`} className="ml-auto">
+                      <Button variant="outline" size="sm" type="button">
+                        View Profile
+                      </Button>
+                    </NextLink>
+                  </div>
+
+                  <Button type="submit" disabled={isSubmittingAppearance}>
+                    {isSubmittingAppearance ? "Saving..." : "Save Appearance"}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>

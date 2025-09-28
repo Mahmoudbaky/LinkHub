@@ -11,6 +11,7 @@ export type User = {
 
   // User customization options
   theme: string; // Theme for their page
+  titleColor: string | null;
   backgroundColor: string | null; // Custom background color
   textColor: string | null; // Custom text color
 

@@ -7,8 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "prisma:generate": "npx prisma generate",
-    "prisma:push": "npx prisma db push",
+    "prisma:generate": "pnpm dlx prisma generate",
+    "prisma:push": "pnpm dlx prisma db push ",
     "postinstall": "prisma generate"
   },
   "dependencies": {
