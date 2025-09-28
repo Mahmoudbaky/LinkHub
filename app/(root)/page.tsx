@@ -45,13 +45,172 @@ import {
   editLink,
   deleteLink,
   toggleLinkActivation,
+  updateLinkPositions,
 } from "@/lib/actions/link.actions";
-import { User } from "@/types";
+import { User, Link as LinkType } from "@/types";
 import Link from "next/link";
 import { UILink } from "@/types";
 import EditLinkForm from "@/components/dashboard/EditLinkForm";
 import EditLinkThemeForm from "@/components/dashboard/EditLinkThemeForm";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+// Sortable Link Item Component
+function SortableLinkItem({
+  link,
+  onToggleActive,
+  onEdit,
+  onEditTheme,
+  onDelete,
+  editingLink,
+  editingLinkTheme,
+  setEditingLink,
+  setEditingLinkTheme,
+  handleEditLink,
+}: {
+  link: UILink;
+  onToggleActive: (linkId: string) => void;
+  onEdit: (link: UILink) => void;
+  onEditTheme: (link: UILink) => void;
+  onDelete: (linkId: string) => void;
+  editingLink: UILink | null;
+  editingLinkTheme: UILink | null;
+  setEditingLink: (link: UILink | null) => void;
+  setEditingLinkTheme: (link: UILink | null) => void;
+  handleEditLink: (link: UILink) => Promise<void>;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-4 p-4 border rounded-lg bg-card"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-black dark:text-white" />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-medium text-card-foreground truncate">
+            {link.title}
+          </h3>
+          {!link.isActive && (
+            <Badge variant="secondary" className="text-xs">
+              Inactive
+            </Badge>
+          )}
+        </div>
+        <p className="text-sm text-neutral-600 dark:text-primary/70 truncate">
+          {link.url}
+        </p>
+        {link.description && (
+          <p className="text-sm text-neutral-600 mt-1">{link.description}</p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 text-sm text-primary/85 dark:text-muted-foreground">
+        <BarChart3 className="w-4 h-4" />
+        {link.clicks}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {/* Active Toggle */}
+        <Switch
+          checked={link.isActive}
+          onCheckedChange={() => onToggleActive(link.id)}
+        />
+        {/*Edit Link Dialog */}
+        <Dialog
+          open={editingLink?.id === link.id}
+          onOpenChange={(open) => {
+            if (!open) setEditingLink(null);
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="sm" onClick={() => onEdit(link)}>
+              <Edit3 className="w-4 h-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Link</DialogTitle>
+            </DialogHeader>
+            <EditLinkForm
+              link={link}
+              onSave={handleEditLink}
+              onCancel={() => setEditingLink(null)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Link Theme Dialog */}
+        <Dialog
+          open={editingLinkTheme?.id === link.id}
+          onOpenChange={(open) => {
+            if (!open) setEditingLinkTheme(null);
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="sm" onClick={() => onEditTheme(link)}>
+              <Palette className="w-4 h-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Link Theme</DialogTitle>
+            </DialogHeader>
+            <EditLinkThemeForm
+              link={link}
+              onSave={handleEditLink}
+              onCancel={() => setEditingLinkTheme(null)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Link */}
+        <Button variant="ghost" size="sm" onClick={() => onDelete(link.id)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<Partial<User> | null>(null);
@@ -61,6 +220,14 @@ export default function DashboardPage() {
   const [editingLinkTheme, setEditingLinkTheme] = useState<UILink | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -307,6 +474,46 @@ export default function DashboardPage() {
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = links.findIndex((link) => link.id === active.id);
+    const newIndex = links.findIndex((link) => link.id === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      // Update the local state immediately for better UX
+      const newLinks = arrayMove(links, oldIndex, newIndex);
+      setLinks(newLinks);
+
+      // Prepare the position updates for the server
+      const linkUpdates = newLinks.map((link, index) => ({
+        id: link.id,
+        position: index,
+      }));
+
+      try {
+        // Update positions in the database
+        const result = await updateLinkPositions(linkUpdates);
+        if (result.success) {
+          toast("Link order updated successfully.");
+        } else {
+          // Revert the local state if server update fails
+          setLinks(links);
+          toast(result.error || "Failed to update link order");
+        }
+      } catch (error) {
+        // Revert the local state if server update fails
+        setLinks(links);
+        console.error("Error updating link positions:", error);
+        toast("Failed to update link order");
+      }
+    }
+  };
+
   const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0);
   const activeLinks = links.filter((link) => link.isActive).length;
 
@@ -513,114 +720,34 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               ) : (
-                links
-                  .sort((a, b) => a.position - b.position)
-                  .map((link) => (
-                    <div
-                      key={link.id}
-                      className="flex items-center gap-4 p-4 border rounded-lg bg-card"
-                    >
-                      <GripVertical className="w-4 h-4 text-black dark:text-white cursor-grab" />
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-card-foreground truncate">
-                            {link.title}
-                          </h3>
-                          {!link.isActive && (
-                            <Badge variant="secondary" className="text-xs">
-                              Inactive
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-neutral-600 dark:text-primary/70 truncate">
-                          {link.url}
-                        </p>
-                        {link.description && (
-                          <p className="text-sm text-neutral-600 mt-1">
-                            {link.description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm text-primary/85 dark:text-muted-foreground">
-                        <BarChart3 className="w-4 h-4" />
-                        {link.clicks}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {/* Active Toggle */}
-                        <Switch
-                          checked={link.isActive}
-                          onCheckedChange={() => handleToggleActive(link.id)}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={links.map((link) => link.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {links
+                      .sort((a, b) => a.position - b.position)
+                      .map((link) => (
+                        <SortableLinkItem
+                          key={link.id}
+                          link={link}
+                          onToggleActive={handleToggleActive}
+                          onEdit={setEditingLink}
+                          onEditTheme={setEditingLinkTheme}
+                          onDelete={handleDeleteLink}
+                          editingLink={editingLink}
+                          editingLinkTheme={editingLinkTheme}
+                          setEditingLink={setEditingLink}
+                          setEditingLinkTheme={setEditingLinkTheme}
+                          handleEditLink={handleEditLink}
                         />
-                        {/*Edit Link Dialog */}
-                        <Dialog
-                          open={editingLink?.id === link.id}
-                          onOpenChange={(open) => {
-                            if (!open) setEditingLink(null);
-                          }}
-                        >
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingLink(link)}
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Edit Link</DialogTitle>
-                            </DialogHeader>
-                            <EditLinkForm
-                              link={link}
-                              onSave={handleEditLink}
-                              onCancel={() => setEditingLink(null)}
-                            />
-                          </DialogContent>
-                        </Dialog>
-
-                        {/* Edit Link Theme Dialog */}
-                        <Dialog
-                          open={editingLinkTheme?.id === link.id}
-                          onOpenChange={(open) => {
-                            if (!open) setEditingLinkTheme(null);
-                          }}
-                        >
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingLinkTheme(link)}
-                            >
-                              <Palette className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Edit Link Theme</DialogTitle>
-                            </DialogHeader>
-                            <EditLinkThemeForm
-                              link={link}
-                              onSave={handleEditLink}
-                              onCancel={() => setEditingLinkTheme(null)}
-                            />
-                          </DialogContent>
-                        </Dialog>
-
-                        {/* Delete Link */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteLink(link.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
+                      ))}
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
           </CardContent>

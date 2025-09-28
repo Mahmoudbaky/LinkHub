@@ -63,7 +63,7 @@ export function FeaturedLinksSlider({ sliderLinks }: FeaturedLinksSliderProps) {
                 />
                 <div className="absolute inset-0  group-hover:bg-black/30 transition-colors duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                  <h3 className="text-lg font-semibold mb-1 line-clamp-1">
+                  <h3 className="text-lg text-black font-semibold mb-1 line-clamp-1">
                     {link.title}
                   </h3>
                   {link.description && (

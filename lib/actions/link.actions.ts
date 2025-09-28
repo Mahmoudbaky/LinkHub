@@ -57,20 +57,26 @@ export const createLink = async (data: z.infer<typeof createLinkSchema>) => {
 };
 
 export const updateLinkPositions = async (
-  userId: string,
-  links: { id: string; position: number }[]
+  linkUpdates: { id: string; position: number }[]
 ) => {
   try {
+    // Use a transaction to update all positions atomically
     await prisma.$transaction(
-      links.map((link) => {
-        return prisma.link.update({
-          where: { id: link.id },
-          data: { position: link.position },
-        });
-      })
+      linkUpdates.map(({ id, position }) =>
+        prisma.link.update({
+          where: { id },
+          data: { position },
+        })
+      )
     );
+
+    // Revalidate the page to refresh the data
+    revalidatePath("/");
+
+    return { success: true, message: "Link positions updated successfully" };
   } catch (error) {
     console.error("Error updating link positions:", error);
+    return { success: false, error: "Failed to update link positions" };
   }
 };
 
