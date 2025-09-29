@@ -93,25 +93,22 @@ export default async function ProfilePage(props: {
     >
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Show dashboard button if user is logged in and viewing their own profile */}
-        <div className="flex mb-4 w-full items-center justify-between gap-2">
-          {isOwnProfile && (
-            <Link href="/">
-              <Button
-                style={{
-                  backgroundColor:
-                    user.theme === "dark" ? "#19252e" : "#f2f2f2",
-                }}
-                variant="outline"
-                size="sm"
-                className="w-full cursor-pointer border-none"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
-            </Link>
-          )}
-          {/* <ClientThemeToggle /> */}
-        </div>
+
+        {isOwnProfile && (
+          <Link href="/">
+            <Button
+              style={{
+                backgroundColor: user.theme === "dark" ? "#19252e" : "#f2f2f2",
+              }}
+              variant="outline"
+              size="sm"
+              className="w-full mb-4 cursor-pointer border-none"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
+          </Link>
+        )}
 
         {/* Profile Header */}
         <div className="text-center mb-8">
@@ -178,13 +175,11 @@ export default async function ProfilePage(props: {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-border">
-          <p
-            style={{
-              color: user.theme === "dark" ? "#ffffff" : "#4b5563",
-            }}
-            className="text-sm text-gray-600 dark:text-white"
-          >
+        <div
+          style={{ borderTopColor: user.textColor || "var(--foreground)" }}
+          className={`text-center mt-12 pt-8 border-t`}
+        >
+          <p className="text-sm">
             Create your own link page from{" "}
             <span>
               <Link href={"/signup"} className="underline font-medium">
