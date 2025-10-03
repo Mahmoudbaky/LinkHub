@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { UILink } from "@/types";
 import { incrementLinkClicks } from "@/lib/actions/link.actions";
+import { useRouter } from "next/navigation";
 // import Image from "next/image";
 
 interface FeaturedLinksSliderProps {
@@ -11,17 +12,19 @@ interface FeaturedLinksSliderProps {
 }
 
 export function FeaturedLinksSlider({ sliderLinks }: FeaturedLinksSliderProps) {
+  const router = useRouter();
+
   const handleSlideClick = async (link: UILink) => {
     try {
       // Track the click
       await incrementLinkClicks(link.id);
 
       // Open the link
-      window.open(link.url, "_blank", "noopener,noreferrer");
+      router.push(link.url);
     } catch (error) {
       console.error("Error tracking click:", error);
       // Still open the link even if tracking fails
-      window.open(link.url, "_blank", "noopener,noreferrer");
+      router.push(link.url);
     }
   };
 
