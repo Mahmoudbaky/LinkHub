@@ -98,14 +98,15 @@ export default async function ProfilePage(props: {
           <Link href="/">
             <Button
               style={{
-                backgroundColor: user.theme === "dark" ? "#19252e" : "#f2f2f2",
+                backgroundColor: user.backgroundColor || "var(--background)",
+                color: user.textColor || "var(--foreground)",
+                borderColor: user.textColor || "var(--foreground)",
               }}
               variant="outline"
               size="sm"
-              className="w-full mb-4 cursor-pointer border-none"
+              className="w-[40px] rounded-full flex items-center mb-4 cursor-pointer"
             >
-              <Settings className="w-4 h-4 mr-2" />
-              Edit Profile
+              <Settings className="w-4 h-4" />
             </Button>
           </Link>
         )}
